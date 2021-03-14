@@ -161,7 +161,7 @@ def next_yes():
     return jsonify(return_val)
 
 
-@app.route('/next/no', methods=['POST'])
+@app.route('/next/no', methods=['GET'])
 def next_no():
     opt = parse_cmdline()
     logging.basicConfig(level=logging.DEBUG if opt.verbose else logging.INFO)
