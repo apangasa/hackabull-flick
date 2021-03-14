@@ -19,7 +19,7 @@ def text_similarity(text_list, movie_in, movies, count):
 
 def score_by_genre(movie_in, movies, count):
     # fill index for genres appropriately
-    genres = [movie[3] for movie in movies]
+    genres = [movie[10] for movie in movies]
 
     return text_similarity(genres, movie_in, movies, count)
 
@@ -28,13 +28,11 @@ def score_by_synposis(synopses, movie_in, movies, count):
     return text_similarity(synopses, movie_in, movies, count)
 
 
-def recommend(movie_in):
+def recommend(movie_in, movies):
     movies_in = {}
     with open('backend/liked.json', 'r') as liked:
         movies_in = json.load(liked)
     movies_in[movie_in['id']] = movie_in
-
-    movies = []  # Request movies
 
     scores_by_genre = set()
     for in_key in movies_in.keys():
@@ -44,7 +42,7 @@ def recommend(movie_in):
 
     indices = [score[0] for score in scores_by_genre]
     # fill index for description appropriately
-    synopses = [movies[index][4] for index in indices]
+    synopses = [movies[index][8] for index in indices]
     scores_by_synopsis = score_by_synposis(synopses, movie_in, movies, 5)
 
     indices = [score[0] for score in scores_by_synopsis]
