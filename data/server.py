@@ -99,7 +99,7 @@ def begin():
     conn = psycopg2.connect(opt.dsn)
     row = None
     with conn.cursor() as cur:
-        cur.execute("SELECT column FROM table ORDER BY RANDOM() LIMIT 1")
+        cur.execute("SELECT * FROM movies ORDER BY RANDOM() LIMIT 1")
         rows = cur.fetchall()
         row = rows[0]
         logging.debug("print_content(): status message: %s", cur.statusmessage)
@@ -136,7 +136,7 @@ def next():
         return 'No data', 400
 
     with conn.cursor() as cur:
-        cur.execute("SELECT column FROM table ORDER BY RANDOM() LIMIT 500")
+        cur.execute("SELECT * FROM movies ORDER BY RANDOM() LIMIT 500")
         rows = cur.fetchall()
         logging.debug("print_content(): status message: %s", cur.statusmessage)
     conn.commit()
