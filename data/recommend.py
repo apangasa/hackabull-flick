@@ -71,3 +71,50 @@ def recommend(movie_in, movies):
 
     avg_sims_np = np.array(avg_sims)
     return recommendations[np.argmax(avg_sims_np)]
+
+
+def recommend_no(movies):
+    movies_in = {}
+    with open('data/liked.json', 'r') as liked:
+        movies_in = json.load(liked)
+
+    if(len(movies_in.keys()) == 0):
+        return movies[0]
+
+    with open('data/liked.json', 'w') as liked:
+        json.dump(movies_in, liked)
+
+    scores_by_genre = set()
+    for in_key in movies_in.keys():
+        scores_by_genre += set(score_by_genre(movies_in[in_key], movies, 25))
+    scores_by_genre = sorted(
+        scores_by_genre, reverse=True, key=lambda element: element[1])[1:50]
+
+    indices = [score[0] for score in scores_by_genre]
+    # fill index for description appropriately
+    synopses = [movies[index][8] for index in indices]
+    scores_by_synopsis = score_by_synposis(synopses, movie_in, movies, 5)
+
+    indices = [score[0] for score in scores_by_synopsis]
+    recommendations = [movies[index] for index in indices]
+
+    avg_sims = []
+
+    # cosine similarity of feature vectors
+    for rec in recommendations:
+        rec_vector = np.array([rec['run_time'], rec['year'],
+                               rec['imdb_rating'], rec['rt_rating'], rec['imdb_votes']])
+        avg_sim = 0
+
+        for query in movies_in:
+            query_vector = np.array([query['run_time'], query['year'],
+                                     query['imdb_rating'], query['rt_rating'], query['imdb_votes']])
+
+            sim = cosine_similarity([query_vector], [rec_vector])
+            avg_sim += sim
+
+        avg_sim /= len(movies_in.keys())
+        avg_sims.append(avg_sim)
+
+    avg_sims_np = np.array(avg_sims)
+    return recommendations[np.argmax(avg_sims_np)]
