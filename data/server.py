@@ -6,6 +6,7 @@ from flask_cors import CORS
 from argparse import ArgumentParser, RawTextHelpFormatter
 import psycopg2
 from psycopg2.errors import SerializationFailure
+from recommend import recommend
 
 
 app = Flask(__name__)
@@ -103,6 +104,44 @@ def begin():
         row = rows[0]
         logging.debug("print_content(): status message: %s", cur.statusmessage)
     conn.commit()
+
+    return_val = {
+        row[0]: {
+            'title': row[1],
+            'run_time': row[2],
+            'year': row[3],
+            'imdb_rating': row[4],
+            'rt_rating': row[5],
+            'rated': row[6],
+            'img': row[7],
+            'description': row[8],
+            'imdb_votes': row[9],
+            'genres': row[10]
+        }
+    }
+
+    return jsonify(return_val)
+
+
+@app.route('/next', methods=['POST'])
+def next():
+    opt = parse_cmdline()
+    logging.basicConfig(level=logging.DEBUG if opt.verbose else logging.INFO)
+    conn = psycopg2.connect(opt.dsn)
+    rows = None
+
+    data = request.json.get('data', None)
+
+    if not data:
+        return 'No data', 400
+
+    with conn.cursor() as cur:
+        cur.execute("SELECT column FROM table ORDER BY RANDOM() LIMIT 500")
+        rows = cur.fetchall()
+        logging.debug("print_content(): status message: %s", cur.statusmessage)
+    conn.commit()
+
+    row = recommend(data, rows)
 
     return_val = {
         row[0]: {
