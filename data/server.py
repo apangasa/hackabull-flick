@@ -36,23 +36,41 @@ def parse_cmdline():
 def create_movies(conn):
     with conn.cursor() as cur:
         cur.execute(
-            "CREATE TABLE IF NOT EXISTS movies (id INT PRIMARY KEY, title STRING, run_time STRING, year STRING, imdb_rating STRING, rt_rating STRING, rated STRING, img STRING, description STRING; imdb_votes STRING, genres STRING)"
+            "CREATE TABLE IF NOT EXISTS movies (id INT PRIMARY KEY, title STRING, run_time STRING, year STRING, imdb_rating STRING, rt_rating STRING, rated STRING, img STRING, description STRING, imdb_votes STRING, genres STRING)"
         )
         # CREATE variable values by looping through movies json, creating list of tuples, and stringifying it
       
         with open("movie_data.json") as json_file:
-            data = json.load(movie_data.json)
+            data = json.load(json_file)
 
             str = ""
             genreStr = ""
 
+            j = 0
+            print(len(data.keys()))
+
+
             for i in data.keys():
                 genreStr = ' '.join(sorted(data[i]["genres"]))
-                str += ", (" + data[i]["title"] + ", " + data[i]["run_time"] + ", " + data[i]["year"] + ", " + data[i]["imdb_rating"] + ", " + data[i]["rt_rating"] + ", " + data[i]["rated"] + ", " + data[i]["img"] + ", " + data[i]["description"] + ", " + data[i]["imdb_votes"] + ", " + genreStr + ")"
+                #str += "(" + "\"" + data[i]["title"] + "\"" + ", " + "\"" + data[i]["run_time"] + "\"" + ", " + "\"" + data[i]["year"] + "\"" + ", " + "\"" + data[i]["imdb_rating"] + "\"" + ", " + "\"" + data[i]["rt_rating"] + "\"" + ", " + "\"" + data[i]["rated"] + "\"" + ", " + "\"" + data[i]["img"] + "\"" + ", " + "\"" + data[i]["description"] + "\"" + ", " + "\"" + data[i]["imdb_votes"] + "\"" + ", " + "\"" + genreStr + "\"" + ")"
+                
+                var = "UPSERT INTO movies VALUES " + "(" + i[2:] + ", " + "'" + data[i]["title"].replace("'", "~") + "'" + ", " + "'" + data[i]["run_time"] + "'" + ", " + "'" + data[i]["year"] + "'" + ", " + "'" + data[i]["imdb_rating"] + "'" + ", " + "'" + data[i]["rt_rating"] + "'" + ", " + "'" + data[i]["rated"] + "'" + ", " + "'" + data[i]["img"] + "'" + ", " + "'" + data[i]["description"].replace("'", "~") + "'" + ", " + "'" + data[i]["imdb_votes"] + "'" + ", " + "'" + genreStr + "'" + ")"
+                #var = "UPSERT INTO movies VALUES (1,'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a.replace("'", "\'")
 
-            str = str[2:]
+                #print(var)
+                   
+                if j > 4000:
+                    break
+                
+                #try:
+                cur.execute(var)
+                #except Exception as e:
+                 #   print(e)
+                  #  print(var)
+                
+                j += 1
 
-        cur.execute("UPSERT INTO movies (id, title, run_time, year, imdb_rating, rt_rating, rated, img, description, imdb_votes, genres) VALUES " + values)
+        #cur.execute("UPSERT INTO movies (id, title, run_time, year, imdb_rating, rt_rating, rated, img, description, imdb_votes, genres) VALUES " + str)
         logging.debug("create_movies(): status message: %s", cur.statusmessage)
     conn.commit()
         
@@ -62,14 +80,18 @@ def something():
     #content = request.json
     #resp = None
     #return jsonify(response=resp)
+    #opt = parse_cmdline()
+    #logging.basicConfig(level=logging.DEBUG if opt.verbose else logging.INFO)
+    #conn = psycopg2.connect(opt.dsn)
+    #create_movies(conn)
+
+    #conn.close()
+    return "Created Movies"
+
+if __name__ == '__main__':
     opt = parse_cmdline()
     logging.basicConfig(level=logging.DEBUG if opt.verbose else logging.INFO)
     conn = psycopg2.connect(opt.dsn)
     create_movies(conn)
-
     conn.close()
-    return "Created Movies"
-
-if __name__ == '__main__':
-    
     app.run()
