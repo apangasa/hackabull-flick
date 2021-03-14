@@ -30,9 +30,12 @@ def score_by_synposis(synopses, movie_in, movies, count):
 
 def recommend(movie_in, movies):
     movies_in = {}
-    with open('backend/liked.json', 'r') as liked:
+    with open('data/liked.json', 'r') as liked:
         movies_in = json.load(liked)
     movies_in[movie_in['id']] = movie_in
+
+    with open('data/liked.json', 'w') as liked:
+        json.dump(movies_in, liked)
 
     scores_by_genre = set()
     for in_key in movies_in.keys():
