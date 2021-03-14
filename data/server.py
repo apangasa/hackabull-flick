@@ -6,7 +6,7 @@ from flask_cors import CORS
 from argparse import ArgumentParser, RawTextHelpFormatter
 import psycopg2
 from psycopg2.errors import SerializationFailure
-from recommend import recommend
+from recommend import recommend, recommend_no
 
 
 app = Flask(__name__)
@@ -123,8 +123,8 @@ def begin():
     return jsonify(return_val)
 
 
-@app.route('/next', methods=['POST'])
-def next():
+@app.route('/next/yes', methods=['POST'])
+def next_yes():
     opt = parse_cmdline()
     logging.basicConfig(level=logging.DEBUG if opt.verbose else logging.INFO)
     conn = psycopg2.connect(opt.dsn)
@@ -142,6 +142,39 @@ def next():
     conn.commit()
 
     row = recommend(data, rows)
+
+    return_val = {
+        row[0]: {
+            'title': row[1],
+            'run_time': row[2],
+            'year': row[3],
+            'imdb_rating': row[4],
+            'rt_rating': row[5],
+            'rated': row[6],
+            'img': row[7],
+            'description': row[8],
+            'imdb_votes': row[9],
+            'genres': row[10]
+        }
+    }
+
+    return jsonify(return_val)
+
+
+@app.route('/next/no', methods=['POST'])
+def next_no():
+    opt = parse_cmdline()
+    logging.basicConfig(level=logging.DEBUG if opt.verbose else logging.INFO)
+    conn = psycopg2.connect(opt.dsn)
+    rows = None
+
+    with conn.cursor() as cur:
+        cur.execute("SELECT * FROM movies ORDER BY RANDOM() LIMIT 500")
+        rows = cur.fetchall()
+        logging.debug("print_content(): status message: %s", cur.statusmessage)
+    conn.commit()
+
+    row = recommend_no(rows)
 
     return_val = {
         row[0]: {
