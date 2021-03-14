@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                 if (manager.getTopPosition() == adapter.getItemCount() - 5){
                     paginate();
                 }
-
+                //setContentView(R.layout.activity_waiting);
             }
 
             @Override
@@ -139,9 +139,9 @@ public class MainActivity extends AppCompatActivity {
         List<ItemModel> old = adapter.getItems();
         List<ItemModel> new_item = new ArrayList<>(addList());
         CardStackCallback callback = new CardStackCallback(old, new_item);
-        DiffUtil.DiffResult hasil = DiffUtil.calculateDiff(callback);
+        DiffUtil.DiffResult result = DiffUtil.calculateDiff(callback);
         adapter.setItems(new_item);
-        hasil.dispatchUpdatesTo(adapter);
+        result.dispatchUpdatesTo(adapter);
     }
 
     private List<ItemModel> addList() {
@@ -170,13 +170,6 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 if(response.isSuccessful()) {
                     String myResponse = response.body().string();
-                    //try {
-                        //JSONObject jObject = new JSONObject(response.body().string());
-                        //Toast.makeText(MainActivity.this, jObject.getString("page"), Toast.LENGTH_SHORT).show();
-                    //} catch (JSONException e) {
-                        //e.printStackTrace();
-                    //}
-                    //String myResponse = response.body().string();
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -188,5 +181,5 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+    }
 
-}

@@ -35,7 +35,7 @@ public class SplashActivity extends AppCompatActivity {
         logo.setAnimation(logoAnim);
 
         new Handler().postDelayed(() -> {
-            Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+            Intent intent = new Intent(SplashActivity.this, PreferencesActivity.class);
             startActivity(intent);
             finish();
         }, SPLASH_SCREEN);
